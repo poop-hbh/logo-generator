@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Neon Logo Generator v9</title>
+<style>
+    body { background: #0a0a0a; color: #eee; font-family: system-ui, sans-serif;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        min-height: 100vh; margin: 0; padding: 20px; }
+    h1 { font-size: 24px; margin-bottom: 6px; color: #7fe0a0; }
+    .subtitle { font-size: 13px; color: #888; margin-bottom: 14px; text-align: center; }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; justify-content: center; }
+    .logo-box { background: #111; border-radius: 20px; padding: 0;
+        box-shadow: 0 0 40px rgba(0, 255, 100, 0.15); margin-bottom: 20px;
+        width: 280px; height: 280px; display: flex; align-items: center; justify-content: center;
+        overflow: hidden; }
+    svg { display: block; }
+    button { padding: 12px 24px; background: #1a3a2a; color: #7fe0a0;
+        border: 1px solid #2a5a3a; border-radius: 8px; font-size: 16px;
+        cursor: pointer; font-weight: 600; transition: background 0.2s, opacity 0.2s; }
+    button:hover:not(:disabled) { background: #2a5a3a; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    input { padding: 12px 16px; background: #111; color: #eee;
+        border: 1px solid #333; border-radius: 8px; font-size: 16px;
+        width: 200px; text-align: center; outline: none; }
+    input:focus { border-color: #2a5a3a; }
+    label { color: #888; font-size: 14px; align-self: center; }
+    .warn { color: #ff8080; font-size: 13px; margin-bottom: 10px; height: 16px; text-align: center; }
+    .theme-hint { color: #5fa87a; font-size: 12px; margin-bottom: 10px; height: 14px; text-align: center; }
+</style>
+</head>
+<body>
+    <h1>🎨 Neon Logo Generator v9</h1>
+    <div class="subtitle">Темы: пират, любовь, магия, космос, воин, музыка, кот, огонь</div>
+    <div class="controls">
+        <label>Текст:</label>
+        <input type="text" id="userText" maxlength="15" placeholder="Имя или тема" value="">
+        <button onclick="generate()">🎲 Сгенерировать</button>
+        <button id="downloadBtn" onclick="downloadSVG()">💾 Скачать SVG</button>
+    </div>
+    <div class="warn" id="warnBox"></div>
+    <div class="theme-hint" id="themeHint"></div>
+    <div class="logo-box" id="logoBox"></div>
+
+<script>
+// ============ ФИЛЬТР 18+ ============
+// Список используется для БЛОКИРОВКИ контента. Это часть защиты генератора.
+const badRoots = [
+    'хуй','хуе','хуё','хуи','хуя','хую','хуйн',
+    'пизд','пизж','пезд',
+    'бляд','блят','блядь','бля',
+    'ебал','ебан','ебат','ебет','ебёт','ебуч','ебля','ебло','ебст',
+    'ёбал','ёбан','ёбат','ёбет','ёбёт','ёбуч',
+    'заеб','заёб','доеб','доёб','наеб','наёб','отъеб','отъёб',
+    'перееб','переёб','въеб','въёб','выеб','выёб','подъеб','подъёб',
+    'уеб','уёб','разъеб','разъёб',
+    'сука','суки','суке','суку','сукой','сучар','сучк','сучон',
+    'мудак','мудач','мудил','мудозв',
+    'говн','говён','гавн',
+    'жоп','жёп',
+    'мраз',
+    'гандон','гандош',
+    'долбоеб','долбоёб','долб',
+    'пидор','пидар','педик','пидорас','пидр',
+    'хер','херн','херов',
+    'залуп',
+    'шлюх','шлюш',
+    'манда','мандав','манде',
+    'ссат','ссан','ссык','ссыкун',
+    'перд','перну',
+    'козел','козёл','козлина',
+    'твар',
+    'ублюд',
+    'выбляд',
+    'нахуй','нахуя',
+    'похуй','похуя',
+    'охуе','охуи','охуя',
+    'въебис','въебись',
+    'проеб','проёб',
+    'член','минет','анальн','оральн','вагин','клитор','пенис',
+    'сперм','эякул','оргазм','мастурб','онан','интим','педо','зоофил',
+    'гей','лесби','бисек','транс','секс','порно','порн','сиськ','сись',
+    'писюн','письк','писек','писечк','писюл','сексуал',
+    'xyu','xyi','hui','huy','pidor','pizd','pizda','ebal','ebat',
+    'blyad','blya','suka','suki','mudak','govno','mraz','gandon',
+    'dolboeb','dolboyeb','her','hera','zalu','shluh','manda',
+    'sexy','seks','sex','porn','porno','penis','vagina','boobs',
+    'fuck','fck','fuk','shit','bitch','dick','cock','pussy','ass',
+    'nigga','nigger','whore','slut'
+];
+
+function normalize(text) {
+    if (!text) return '';
+    let t = text.toLowerCase().replace(/[^а-яёa-z0-9]/g, '');
+    t = t.replace(/0/g,'о').replace(/1/g,'и').replace(/3/g,'з')
+         .replace(/4/g,'а').replace(/6/g,'б').replace(/7/g,'т')
+         .replace(/8/g,'в').replace(/9/g,'д');
+    const map = {'a':'а','b':'б','c':'с','d':'д','e':'е','f':'ф','g':'г',
+        'h':'н','i':'и','j':'й','k':'к','l':'л','m':'м','n':'н','o':'о',
+        'p':'р','q':'к','r':'р','s':'с','t':'т','u':'у','v':'в','w':'в',
+        'x':'х','y':'у','z':'з'};
+    return t.split('').map(ch => map[ch] || ch).join('');
+}
+
+function isBadWord(text) {
+    if (!text) return false;
+    const normalized = normalize(text);
+    return badRoots.some(root => normalized.includes(normalize(root)));
+}
+
+// ============ ТЕМЫ ============
+// У каждой темы — набор символов (иконок) + палитры + шрифты + формы.
+const themes = {
+    pirate: {
+        keywords: ['пират','пираты','pirate','корсар','korsar','морской'],
+        icons: ['☠','⚔','⚓','✖','⛧','★','⚑'],
+        palettes: [
+            { bright: '#ff3b3b', dim: '#5a0a0a' },
+            { bright: '#ffd93d', dim: '#5a4a1a' },
+            { bright: '#c8c8c8', dim: '#333333' }
+        ],
+        fonts: ['Georgia','Times New Roman','Impact','Palatino'],
+        shapes: ['diamond','octagon','square','hexagon'],
+        decorations: ['brackets','corners','lines'],
+        backgrounds: ['stripes','stars','none','grid'],
+        effects: ['fill','outline','double'],
+        label: '🏴☠️ пират'
+    },
+    love: {
+        keywords: ['любовь','love','сердце','люблю','любимой','любимая','сердечко'],
+        icons: ['♥','❥','❦','✿','❀','❤'],
+        palettes: [
+            { bright: '#ff7ad9', dim: '#5a2a4a' },
+            { bright: '#ff4d6d', dim: '#5a1a2a' },
+            { bright: '#ff8080', dim: '#5a2a2a' }
+        ],
+        fonts: ['Georgia','Palatino','Times New Roman','Trebuchet MS'],
+        shapes: ['oval','circle','roundedRect','diamond'],
+        decorations: ['dots','orbit','corners'],
+        backgrounds: ['stars','waves','none'],
+        effects: ['fill','gradient','double'],
+        label: '💖 любовь'
+    },
+    magic: {
+        keywords: ['магия','magic','маг','волшебник','колдун','ведьма','чародей'],
+        icons: ['✦','✧','⚝','☾','☯','⚚','★'],
+        palettes: [
+            { bright: '#d0a0ff', dim: '#4a2a5a' },
+            { bright: '#b0ff7a', dim: '#3a5a2a' },
+            { bright: '#5ff0ff', dim: '#1a4a5a' }
+        ],
+        fonts: ['Georgia','Palatino','Trebuchet MS','Times New Roman'],
+        shapes: ['pentagon','star','hexagon','diamond'],
+        decorations: ['orbit','dots','brackets'],
+        backgrounds: ['stars','radial','none'],
+        effects: ['gradient','outline','double'],
+        label: '✨ магия'
+    },
+    space: {
+        keywords: ['космос','space','звезда','звезды','галактика','планета','луна','space'],
+        icons: ['☾','★','☆','✦','✧','⚝','☄','✵'],
+        palettes: [
+            { bright: '#7fb3ff', dim: '#2a3a5a' },
+            { bright: '#d0a0ff', dim: '#4a2a5a' },
+            { bright: '#5ff0ff', dim: '#1a4a5a' }
+        ],
+        fonts: ['Impact','Verdana','Trebuchet MS','Tahoma'],
+        shapes: ['circle','oval','hexagon','star'],
+        decorations: ['dots','orbit','lines'],
+        backgrounds: ['stars','radial','hexagon-grid'],
+        effects: ['gradient','fill','double'],
+        label: '🌌 космос'
+    },
+    warrior: {
+        keywords: ['воин','воины','warrior','боец','рыцарь','knight','самурай','битва'],
+        icons: ['⚔','⛧','☠','▲','◆','✖'],
+        palettes: [
+            { bright: '#ff5f5f', dim: '#5a1a1a' },
+            { bright: '#ffa94d', dim: '#5a3a1a' },
+            { bright: '#c8c8c8', dim: '#333333' }
+        ],
+        fonts: ['Impact','Arial Black','Tahoma','Trebuchet MS'],
+        shapes: ['diamond','triangle','hexagon','octagon'],
+        decorations: ['brackets','corners','lines'],
+        backgrounds: ['stripes','grid','none'],
+        effects: ['fill','outline','double'],
+        label: '⚔️ воин'
+    },
+    music: {
+        keywords: ['музыка','music','песня','певец','рок','rock','бит','beat','мелодия'],
+        icons: ['♪','♫','♬','♩','♭','♯','★'],
+        palettes: [
+            { bright: '#ff7ad9', dim: '#5a2a4a' },
+            { bright: '#d0a0ff', dim: '#4a2a5a' },
+            { bright: '#5ff0ff', dim: '#1a4a5a' }
+        ],
+        fonts: ['Impact','Trebuchet MS','Verdana','Tahoma'],
+        shapes: ['circle','oval','hexagon','pentagon'],
+        decorations: ['orbit','dots','lines'],
+        backgrounds: ['waves','dots','radial'],
+        effects: ['gradient','fill','double'],
+        label: '🎵 музыка'
+    },
+    cat: {
+        keywords: ['кот','кошка','котенок','cat','kitty','котик','кошечка'],
+        icons: ['♥','★','✦','☾','✿','❀'],
+        palettes: [
+            { bright: '#ffa94d', dim: '#5a3a1a' },
+            { bright: '#ff7ad9', dim: '#5a2a4a' },
+            { bright: '#b0ff7a', dim: '#3a5a2a' }
+        ],
+        fonts: ['Comic Sans MS','Trebuchet MS','Verdana','Georgia'],
+        shapes: ['circle','oval','roundedRect','diamond'],
+        decorations: ['dots','corners','orbit'],
+        backgrounds: ['dots','stars','none'],
+        effects: ['fill','gradient','double'],
+        label: '🐱 кот'
+    },
+    fire: {
+        keywords: ['огонь','fire','дракон','dragon','пламя','феникс','феник','жар'],
+        icons: ['▲','◆','✦','⚡','☄','★','⚝'],
+        palettes: [
+            { bright: '#ff5f5f', dim: '#5a1a1a' },
+            { bright: '#ffa94d', dim: '#5a3a1a' },
+            { bright: '#ffd93d', dim: '#5a4a1a' }
+        ],
+        fonts: ['Impact','Arial Black','Tahoma','Trebuchet MS'],
+        shapes: ['triangle','diamond','star','hexagon'],
+        decorations: ['lines','brackets','orbit'],
+        backgrounds: ['radial','stripes','waves'],
+        effects: ['gradient','outline','double'],
+        label: '🔥 огонь/дракон'
+    }
+};
+
+function detectTheme(text) {
+    if (!text) return null;
+    const lower = text.toLowerCase().trim();
+    for (const key in themes) {
+        const t = themes[key];
+        if (t.keywords.some(k => lower.includes(k) || k.includes(lower))) {
+            return t;
+        }
+    }
+    return null;
+}
+
+// ============ БАЗОВЫЕ ДАННЫЕ ============
+const allPalettes = [
+    { bright: '#7fe0a0', dim: '#2a5a3a' },
+    { bright: '#7fb3ff', dim: '#2a3a5a' },
+    { bright: '#d0a0ff', dim: '#4a2a5a' },
+    { bright: '#ff8080', dim: '#5a2a2a' },
+    { bright: '#ffd93d', dim: '#5a4a1a' },
+    { bright: '#5ff0ff', dim: '#1a4a5a' },
+    { bright: '#ff7ad9', dim: '#5a2a4a' },
+    { bright: '#ffa94d', dim: '#5a3a1a' },
+    { bright: '#b0ff7a', dim: '#3a5a2a' },
+    { bright: '#ff5f5f', dim: '#5a1a1a' }
+];
+
+const allFonts = ['Arial Black','Impact','Georgia','Courier New','Verdana','Trebuchet MS','Times New Roman','Comic Sans MS','Tahoma','Palatino'];
+const allIcons = ['⚡','★','♥','◆','▲','☾','✦','✧','∞','☼','⚔','⛧','☯','☠','♪','✿','❀','✵','✵','⚑'];
+const allDecorations = ['none','dots','lines','orbit','brackets','corners'];
+const allCompositions = ['text-in-shape','text-above-shape','text-beside-shape','text-on-banner','two-shapes','text-only-decor'];
+const allBackgrounds = ['none','grid','dots','hexagon-grid','radial','waves','stars','stripes'];
+const allEffects = ['fill','outline','double','gradient'];
+const allStrokeStyles = ['solid','dashed','dotted'];
+const allShapes = ['circle','square','triangle','hexagon','star','diamond','roundedRect','oval','pentagon','octagon'];
+
+let currentSVG = '';
+
+function rnd(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function rndInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function rndFloat(min, max) { return Math.random() * (max - min) + min; }
+
+function getShapePath(form, cx, cy, r, color, strokeStyle, strokeWidth) {
+    const dash = strokeStyle === 'dashed' ? 'stroke-dasharray="12 8"' :
+                 strokeStyle === 'dotted' ? 'stroke-dasharray="2 8"' : '';
+    const attrs = `fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" ${dash}`;
+    switch(form) {
+        case 'circle': return `<circle cx="${cx}" cy="${cy}" r="${r}" ${attrs}/>`;
+        case 'square': return `<rect x="${cx-r}" y="${cy-r}" width="${r*2}" height="${r*2}" ${attrs}/>`;
+        case 'roundedRect': return `<rect x="${cx-r}" y="${cy-r}" width="${r*2}" height="${r*2}" rx="30" ${attrs}/>`;
+        case 'oval': return `<ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="${r*0.7}" ${attrs}/>`;
+        case 'triangle': return `<polygon points="${cx},${cy-r} ${cx+r},${cy+r*0.7} ${cx-r},${cy+r*0.7}" ${attrs}/>`;
+        case 'hexagon': {
+            let p = '';
+            for (let i = 0; i < 6; i++) {
+                const a = (Math.PI / 3) * i - Math.PI / 6;
+                p += `${(cx + r*Math.cos(a)).toFixed(1)},${(cy + r*Math.sin(a)).toFixed(1)} `;
+            }
+            return `<polygon points="${p.trim()}" ${attrs}/>`;
+        }
+        case 'star': {
+            let p = '';
+            for (let i = 0; i < 10; i++) {
+                const a = (Math.PI / 5) * i - Math.PI / 2;
+                const rad = i % 2 === 0 ? r : r * 0.4;
+                p += `${(cx + rad*Math.cos(a)).toFixed(1)},${(cy + rad*Math.sin(a)).toFixed(1)} `;
+            }
+            return `<polygon points="${p.trim()}" ${attrs}/>`;
+        }
+        case 'diamond': return `<polygon points="${cx},${cy-r} ${cx+r},${cy} ${cx},${cy+r} ${cx-r},${cy}" ${attrs}/>`;
+        case 'pentagon': {
+            let p = '';
+            for (let i = 0; i < 5; i++) {
+                const a = (Math.PI * 2 / 5) * i - Math.PI / 2;
+                p += `${(cx + r*Math.cos(a)).toFixed(1)},${(cy + r*Math.sin(a)).toFixed(1)} `;
+            }
+            return `<polygon points="${p.trim()}" ${attrs}/>`;
+        }
+        case 'octagon': {
+            let p = '';
+            for (let i = 0; i < 8; i++) {
+                const a = (Math.PI * 2 / 8) * i - Math.PI / 8;
+                p += `${(cx + r*Math.cos(a)).toFixed(1)},${(cy + r*Math.sin(a)).toFixed(1)} `;
+            }
+            return `<polygon points="${p.trim()}" ${attrs}/>`;
+        }
+        default: return '';
+    }
+}
+
+function getBackground(pattern, color, size, icons) {
+    const c = size / 2;
+    const opacity = 0.08;
+    if (pattern === 'grid') {
+        let out = '';
+        for (let x = 0; x <= size; x += 30) out += `<line x1="${x}" y1="0" x2="${x}" y2="${size}" stroke="${color}" stroke-width="1" opacity="${opacity}"/>`;
+        for (let y = 0; y <= size; y += 30) out += `<line x1="0" y1="${y}" x2="${size}" y2="${y}" stroke="${color}" stroke-width="1" opacity="${opacity}"/>`;
+        return out;
+    }
+    if (pattern === 'dots') {
+        let out = '';
+        for (let x = 12; x < size; x += 25) for (let y = 12; y < size; y += 25)
+            out += `<circle cx="${x}" cy="${y}" r="1.5" fill="${color}" opacity="${opacity * 2}"/>`;
+        return out;
+    }
+    if (pattern === 'hexagon-grid') {
+        let out = '';
+        for (let y = 0; y < size; y += 40) for (let x = 0; x < size; x += 40)
+            out += `<circle cx="${x}" cy="${y}" r="2" fill="${color}" opacity="${opacity * 1.5}"/>`;
+        return out;
+    }
+    if (pattern === 'radial') {
+        let out = '';
+        for (let i = 0; i < 8; i++) {
+            const a = (Math.PI * 2 / 8) * i;
+            out += `<line x1="${(c + 40*Math.cos(a)).toFixed(1)}" y1="${(c + 40*Math.sin(a)).toFixed(1)}" x2="${(c + 160*Math.cos(a)).toFixed(1)}" y2="${(c + 160*Math.sin(a)).toFixed(1)}" stroke="${color}" stroke-width="1" opacity="${opacity}"/>`;
+        }
+        for (let r = 40; r < 160; r += 30) out += `<circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${color}" stroke-width="1" opacity="${opacity}"/>`;
+        return out;
+    }
+    if (pattern === 'waves') {
+        let out = '';
+        for (let y = 20; y < size; y += 30)
+            out += `<path d="M 0 ${y} Q ${c/2} ${y-10} ${c} ${y} T ${size} ${y}" fill="none" stroke="${color}" stroke-width="1" opacity="${opacity}"/>`;
+        return out;
+    }
+    if (pattern === 'stars') {
+        let out = '';
+        for (let i = 0; i < 20; i++) {
+            const x = rndInt(10, size - 10), y = rndInt(10, size - 10), r = rndFloat(0.5, 1.5);
+            out += `<circle cx="${x}" cy="${y}" r="${r}" fill="${color}" opacity="${opacity * 3}"/>`;
+        }
+        return out;
+    }
+    if (pattern === 'stripes') {
+        let out = '';
+        for (let i = -size; i < size * 2; i += 20)
+            out += `<line x1="${i}" y1="0" x2="${i + size}" y2="${size}" stroke="${color}" stroke-width="1" opacity="${opacity}"/>`;
+        return out;
+    }
+    if (pattern === 'icons' && icons && icons.length) {
+        // Фон из тематических иконок
+        let out = '';
+        const step = 50;
+        for (let y = 25; y < size; y += step) {
+            for (let x = 25; x < size; x += step) {
+                const icon = rnd(icons);
+                out += `<text x="${x}" y="${y+5}" text-anchor="middle" font-size="14" fill="${color}" opacity="${opacity * 2}">${icon}</text>`;
+            }
+        }
+        return out;
+    }
+    return '';
+}
+
+function getDecoration(dec, cx, cy, r, color) {
+    const g = `stroke="${color}" fill="none" stroke-width="3" opacity="0.7"`;
+    if (dec === 'dots') {
+        let out = '';
+        const count = rndInt(8, 16);
+        for (let i = 0; i < count; i++) {
+            const a = (Math.PI * 2 / count) * i;
+            out += `<circle cx="${(cx + (r+30)*Math.cos(a)).toFixed(1)}" cy="${(cy + (r+30)*Math.sin(a)).toFixed(1)}" r="3" fill="${color}" opacity="0.7"/>`;
+        }
+        return out;
+    }
+    if (dec === 'lines') {
+        return `
+            <line x1="${cx-r-30}" y1="${cy}" x2="${cx-r-10}" y2="${cy}" ${g}/>
+            <line x1="${cx+r+10}" y1="${cy}" x2="${cx+r+30}" y2="${cy}" ${g}/>
+            <line x1="${cx}" y1="${cy-r-30}" x2="${cx}" y2="${cy-r-10}" ${g}/>
+            <line x1="${cx}" y1="${cy+r+10}" x2="${cx}" y2="${cy+r+30}" ${g}/>`;
+    }
+    if (dec === 'orbit') {
+        return `
+            <ellipse cx="${cx}" cy="${cy}" rx="${r+30}" ry="${(r+30)*0.4}" ${g} transform="rotate(${rndInt(-40, 40)} ${cx} ${cy})"/>
+            <ellipse cx="${cx}" cy="${cy}" rx="${r+30}" ry="${(r+30)*0.4}" ${g} transform="rotate(${rndInt(-40, 40)} ${cx} ${cy})"/>`;
+    }
+    if (dec === 'brackets') {
+        const off = r + 20, size = 25;
+        return `
+            <polyline points="${cx-off+size},${cy-off} ${cx-off},${cy-off} ${cx-off},${cy-off+size}" ${g}/>
+            <polyline points="${cx+off-size},${cy-off} ${cx+off},${cy-off} ${cx+off},${cy-off+size}" ${g}/>
+            <polyline points="${cx-off+size},${cy+off} ${cx-off},${cy+off} ${cx-off},${cy+off-size}" ${g}/>
+            <polyline points="${cx+off-size},${cy+off} ${cx+off},${cy+off} ${cx+off},${cy+off-size}" ${g}/>`;
+    }
+    if (dec === 'corners') {
+        const off = r + 10, size = 15;
+        return `
+            <line x1="${cx-off}" y1="${cy-off}" x2="${cx-off+size}" y2="${cy-off}" ${g}/>
+            <line x1="${cx-off}" y1="${cy-off}" x2="${cx-off}" y2="${cy-off+size}" ${g}/>
+            <line x1="${cx+off}" y1="${cy+off}" x2="${cx+off-size}" y2="${cy+off}" ${g}/>
+            <line x1="${cx+off}" y1="${cy+off}" x2="${cx+off}" y2="${cy+off-size}" ${g}/>`;
+    }
+    return '';
+}
+
+function renderText(text, cx, cy, fontSize, font, color, colorDim, effect, gradId) {
+    const baseAttrs = `text-anchor="middle" font-family="${font}" font-size="${fontSize}" font-weight="900"`;
+    if (effect === 'outline') return `<text x="${cx}" y="${cy}" ${baseAttrs} fill="none" stroke="${color}" stroke-width="2">${text}</text>`;
+    if (effect === 'double') return `
+        <text x="${cx}" y="${cy}" ${baseAttrs} fill="none" stroke="${color}" stroke-width="4">${text}</text>
+        <text x="${cx}" y="${cy}" ${baseAttrs} fill="${colorDim}">${text}</text>`;
+    if (effect === 'gradient') return `<text x="${cx}" y="${cy}" ${baseAttrs} fill="url(#${gradId})">${text}</text>`;
+    return `<text x="${cx}" y="${cy}" ${baseAttrs} fill="${color}">${text}</text>`;
+}
+
+// Ставит большую тематическую иконку рядом с текстом
+function getBigIcon(icons, cx, cy, pal, fontSize, position) {
+    if (!icons || !icons.length) return '';
+    const icon = rnd(icons);
+    let iconSize = fontSize * 1.3;
+    let x = cx;
+    let y = cy;
+    const offset = fontSize * 1.4;
+
+    if (position === 'top') { y = cy - offset; }
+    else if (position === 'bottom') { y = cy + offset + 10; }
+    else if (position === 'left') { x = cx - offset * 1.3; }
+    else if (position === 'right') { x = cx + offset * 1.3; }
+    else if (position === 'corner-tl') { x = 45; y = 45; iconSize = 36; }
+    else if (position === 'corner-tr') { x = 195; y = 45; iconSize = 36; }
+    else if (position === 'corner-bl') { x = 45; y = 200; iconSize = 36; }
+    else if (position === 'corner-br') { x = 195; y = 200; iconSize = 36; }
+
+    return `<text x="${x}" y="${y}" text-anchor="middle" font-family="Arial, sans-serif" font-size="${iconSize}" font-weight="900" fill="${pal.bright}">${icon}</text>`;
+}
+
+function generate() {
+    const userInput = document.getElementById('userText').value.trim().toUpperCase();
+    let display;
+    if (userInput) {
+        display = userInput;
+    } else {
+        const useSymbol = Math.random() < 0.35;
+        display = useSymbol ? rnd(allIcons) : String.fromCharCode(65 + rndInt(0, 25));
+    }
+
+    const warnBox = document.getElementById('warnBox');
+    const themeHint = document.getElementById('themeHint');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const logoBox = document.getElementById('logoBox');
+
+    // Проверка 18+
+    if (isBadWord(display)) {
+        warnBox.textContent = '⛔ Запрещённое слово. Введите другое.';
+        themeHint.textContent = '';
+        logoBox.innerHTML = '<div style="width:100%;height:100%;background:#000;"></div>';
+        downloadBtn.disabled = true;
+        currentSVG = '';
+        return;
+    } else {
+        warnBox.textContent = '';
+        downloadBtn.disabled = false;
+    }
+
+    // ============ ОПРЕДЕЛЯЕМ ТЕМУ ============
+    const theme = detectTheme(display);
+
+    let palettes, fonts, icons, decorations, shapes, backgrounds, effects;
+    if (theme) {
+        palettes = theme.palettes;
+        fonts = theme.fonts;
+        icons = theme.icons;
+        decorations = theme.decorations;
+        shapes = theme.shapes;
+        // К обычным фонам добавляем "icons" — фон из тематических иконок
+        backgrounds = theme.backgrounds.concat(['icons']);
+        effects = theme.effects;
+        themeHint.textContent = 'Активирована тема: ' + theme.label;
+    } else {
+        palettes = allPalettes;
+        fonts = allFonts;
+        icons = allIcons;
+        decorations = allDecorations;
+        shapes = allShapes;
+        backgrounds = allBackgrounds;
+        effects = allEffects;
+        themeHint.textContent = '';
+    }
+
+    const pal = rnd(palettes);
+    const font = rnd(fonts);
+    const dec = rnd(decorations);
+    const strokeStyle = rnd(allStrokeStyles);
+    const composition = rnd(allCompositions);
+    const bgPattern = rnd(backgrounds);
+    const textEffect = rnd(effects);
+    const rotation = rndInt(-25, 25);
+    const strokeWidth = rndInt(6, 12);
+
+    const size = 240;
+    const cx = size / 2;
+    const cy = size / 2;
+    const gradId = 'grad' + Math.random().toString(36).substring(2, 9);
+    const glowId = 'glow' + Math.random().toString(36).substring(2, 9);
+
+    const bgSVG = getBackground(bgPattern, pal.bright, size, icons);
+    let mainSVG = '';
+    let textLayer = '';
+
+    if (composition === 'text-in-shape') {
+        const shapeSize = rndInt(70, 85);
+        const form = rnd(shapes);
+        const shapeSVG = getShapePath(form, cx, cy, shapeSize, `url(#${gradId})`, strokeStyle, strokeWidth);
+        const decorationSVG = getDecoration(dec, cx, cy, shapeSize, pal.bright);
+        let fontSize = Math.min(72, 240 / Math.max(display.length, 1));
+        fontSize = Math.max(fontSize, 12) * 0.75;
+        textLayer = renderText(display, cx, cy + fontSize * 0.35, fontSize, font, pal.bright, pal.dim, textEffect, gradId);
+        mainSVG = `${decorationSVG}<g transform="rotate(${rotation} ${cx} ${cy})">${shapeSVG}</g>`;
+    } else if (composition === 'text-above-shape') {
+        const form = rnd(shapes);
+        let fontSize = Math.min(46, 220 / Math.max(display.length, 1));
+        fontSize = Math.max(fontSize, 14);
+        const shapeY = cy + 55;
+        const shapeSVG = getShapePath(form, cx, shapeY, 45, `url(#${gradId})`, strokeStyle, strokeWidth);
+        textLayer = renderText(display, cx, cy - 15, fontSize, font, pal.bright, pal.dim, textEffect, gradId);
+        mainSVG = `<g transform="rotate(${rotation} ${cx} ${shapeY})">${shapeSVG}</g>`;
+    } else if (composition === 'text-beside-shape') {
+        const form = rnd(shapes);
+        const shapeX = 55;
+        const shapeSVG = getShapePath(form, shapeX, cy, 45, `url(#${gradId})`, strokeStyle, strokeWidth);
+        const symbol = rnd(icons);
+        let fontSize = Math.min(48, 180 / Math.max(display.length, 1));
+        fontSize = Math.max(fontSize, 12);
+        mainSVG = `<g transform="rotate(${rotation} ${shapeX} ${cy})">${shapeSVG}</g>
+                   <text x="${shapeX}" y="${cy + 15}" text-anchor="middle" font-family="${font}" font-size="40" font-weight="900" fill="${pal.bright}">${symbol}</text>`;
+        textLayer = renderText(display, 155, cy + fontSize * 0.35, fontSize, font, pal.bright, pal.dim, textEffect, gradId);
+    } else if (composition === 'text-on-banner') {
+        const bannerH = 60, bannerW = 200;
+        const bannerY = cy - bannerH / 2, bannerX = cx - bannerW / 2;
+        mainSVG = `
+            <path d="M ${bannerX - 15} ${bannerY} L ${bannerX + bannerW + 15} ${bannerY} L ${bannerX + bannerW} ${bannerY + bannerH} L ${bannerX} ${bannerY + bannerH} Z"
+                  fill="none" stroke="url(#${gradId})" stroke-width="${strokeWidth}" stroke-linejoin="round" transform="rotate(${rotation} ${cx} ${cy})"/>`;
+        let fontSize = Math.min(36, 200 / Math.max(display.length, 1));
+        fontSize = Math.max(fontSize, 14);
+        textLayer = renderText(display, cx, cy + fontSize * 0.35, fontSize, font, pal.bright, pal.dim, textEffect, gradId);
+    } else if (composition === 'two-shapes') {
+        const outerForm = rnd(shapes), innerForm = rnd(shapes);
+        const outer = getShapePath(outerForm, cx, cy, 85, `url(#${gradId})`, strokeStyle, strokeWidth);
+        const inner = getShapePath(innerForm, cx, cy, 55, pal.bright, 'solid', 2);
+        let fontSize = Math.min(60, 200 / Math.max(display.length, 1));
+        fontSize = Math.max(fontSize, 12) * 0.7;
+        textLayer = renderText(display, cx, cy + fontSize * 0.35, fontSize, font, pal.bright, pal.dim, textEffect, gradId);
+        mainSVG = `<g transform="rotate(${rotation} ${cx} ${cy})">${outer}<g opacity="0.6">${inner}</g></g>`;
+    } else if (composition === 'text-only-decor') {
+        let fontSize = Math.min(60, 260 / Math.max(display.length, 1));
+        fontSize = Math.max(fontSize, 14);
+        const lineY1 = cy + fontSize * 0.7, lineY2 = cy - fontSize * 0.9, lineLen = 100;
+        const symbol = rnd(icons);
+        mainSVG = `
+            <line x1="${cx - lineLen}" y1="${lineY1}" x2="${cx + lineLen}" y2="${lineY1}" stroke="url(#${gradId})" stroke-width="3" opacity="0.7"/>
+            <line x1="${cx - lineLen}" y1="${lineY2}" x2="${cx + lineLen}" y2="${lineY2}" stroke="url(#${gradId})" stroke-width="3" opacity="0.7"/>
+            <text x="${cx - lineLen - 15}" y="${lineY1 + 6}" text-anchor="middle" font-size="18" fill="${pal.bright}">${symbol}</text>
+            <text x="${cx + lineLen + 15}" y="${lineY1 + 6}" text-anchor="middle" font-size="18" fill="${pal.bright}">${symbol}</text>`;
+        textLayer = renderText(display, cx, cy + fontSize * 0.35, fontSize, font, pal.bright, pal.dim, textEffect, gradId);
+    }
+
+    // ============ БОЛЬШАЯ ТЕМАТИЧЕСКАЯ ИКОНКА ============
+    let bigIcon = '';
+    if (theme && Math.random() < 0.7) {
+        const positions = ['top','bottom','left','right','corner-tl','corner-tr','corner-bl','corner-br'];
+        const pos = rnd(positions);
+        let iconSize;
+        if (composition === 'text-in-shape') iconSize = 50;
+        else if (composition === 'two-shapes') iconSize = 45;
+        else iconSize = 60;
+        bigIcon = getBigIcon(icons, cx, cy, pal, iconSize, pos);
+    }
+
+    currentSVG = `
+<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="${gradId}" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="${pal.bright}"/>
+            <stop offset="100%" stop-color="${pal.dim}"/>
+        </linearGradient>
+        <filter id="${glowId}" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+    </defs>
+    ${bgSVG}
+    <g filter="url(#${glowId})">
+        ${mainSVG}
+        ${textLayer}
+        ${bigIcon}
+    </g>
+</svg>`;
+
+    logoBox.innerHTML = currentSVG;
+}
+
+function downloadSVG() {
+    if (!currentSVG) return;
+    const blob = new Blob([currentSVG], {type: 'image/svg+xml'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'logo_' + Date.now() + '.svg';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+document.getElementById('userText').addEventListener('input', generate);
+generate();
+</script>
+</body>
+</html>
