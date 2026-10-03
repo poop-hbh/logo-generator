@@ -1,0 +1,255 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="75%">
+      <stop offset="0%" stop-color="#1a1a3a"/>
+      <stop offset="40%" stop-color="#0d0a20"/>
+      <stop offset="100%" stop-color="#030208"/>
+    </radialGradient>
+
+    <radialGradient id="nebula1" cx="30%" cy="35%" r="40%">
+      <stop offset="0%" stop-color="#7a3aff" stop-opacity="0.35"/>
+      <stop offset="60%" stop-color="#5a2a9a" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="nebula2" cx="75%" cy="65%" r="45%">
+      <stop offset="0%" stop-color="#3a7aff" stop-opacity="0.3"/>
+      <stop offset="60%" stop-color="#2a4a9a" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="nebula3" cx="55%" cy="20%" r="35%">
+      <stop offset="0%" stop-color="#ff5fa0" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="glowSoft" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="glowStrong" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="starGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <style>
+    @keyframes driftLR {
+      0%   { transform: translate(0, 0); }
+      50%  { transform: translate(8px, 0); }
+      100% { transform: translate(0, 0); }
+    }
+    @keyframes driftRL {
+      0%   { transform: translate(0, 0); }
+      50%  { transform: translate(-8px, 0); }
+      100% { transform: translate(0, 0); }
+    }
+    @keyframes driftUD {
+      0%   { transform: translate(0, 0); }
+      50%  { transform: translate(0, -6px); }
+      100% { transform: translate(0, 0); }
+    }
+    @keyframes driftDU {
+      0%   { transform: translate(0, 0); }
+      50%  { transform: translate(0, 6px); }
+      100% { transform: translate(0, 0); }
+    }
+    @keyframes driftDiag1 {
+      0%   { transform: translate(0, 0); }
+      50%  { transform: translate(6px, -5px); }
+      100% { transform: translate(0, 0); }
+    }
+    @keyframes driftDiag2 {
+      0%   { transform: translate(0, 0); }
+      50%  { transform: translate(-6px, 5px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.9; }
+      50%      { opacity: 0.4; }
+    }
+
+    /* ↓↓ УСИЛЕНО: было ±1.5°, стало ±3.5° ↓↓ */
+    @keyframes rainbowSway {
+      0%   { transform: rotate(-3.5deg) translate(0, 0); }
+      50%  { transform: rotate(3.5deg) translate(0, -3px); }
+      100% { transform: rotate(-3.5deg) translate(0, 0); }
+    }
+
+    /* ↓↓ Облака качаются сильнее ↓↓ */
+    @keyframes cloudSwayLeft {
+      0%   { transform: translate(0, 0); }
+      50%  { transform: translate(3px, -2px); }
+      100% { transform: translate(0, 0); }
+    }
+    @keyframes cloudSwayRight {
+      0%   { transform: translate(0, 0); }
+      50%  { transform: translate(-3px, -2px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    .group-a { animation: driftLR 14s ease-in-out infinite; }
+    .group-b { animation: driftRL 18s ease-in-out infinite; }
+    .group-c { animation: driftUD 16s ease-in-out infinite; }
+    .group-d { animation: driftDU 20s ease-in-out infinite; }
+    .group-e { animation: driftDiag1 22s ease-in-out infinite; }
+    .group-f { animation: driftDiag2 19s ease-in-out infinite; }
+
+    .tw1 { animation: twinkle 3s ease-in-out infinite; }
+    .tw2 { animation: twinkle 4s ease-in-out infinite 0.5s; }
+    .tw3 { animation: twinkle 3.5s ease-in-out infinite 1s; }
+    .tw4 { animation: twinkle 4.5s ease-in-out infinite 1.5s; }
+
+    .rainbow {
+      transform-origin: 100px 145px;
+      animation: rainbowSway 12s ease-in-out infinite;
+    }
+    .cloud-left  { animation: cloudSwayLeft 12s ease-in-out infinite; }
+    .cloud-right { animation: cloudSwayRight 12s ease-in-out infinite; }
+  </style>
+
+  <rect width="200" height="200" rx="32" fill="url(#bg)"/>
+  <rect width="200" height="200" rx="32" fill="url(#nebula1)"/>
+  <rect width="200" height="200" rx="32" fill="url(#nebula2)"/>
+  <rect width="200" height="200" rx="32" fill="url(#nebula3)"/>
+
+  <g class="group-a" fill="#ffffff">
+    <circle cx="12" cy="18" r="0.6" opacity="0.7"/>
+    <circle cx="45" cy="12" r="0.7" opacity="0.8"/>
+    <circle cx="85" cy="15" r="0.6" opacity="0.7"/>
+    <circle cx="128" cy="22" r="0.7" opacity="0.8"/>
+    <circle cx="168" cy="20" r="0.6" opacity="0.7"/>
+    <circle cx="18" cy="95" r="0.7" opacity="0.8"/>
+    <circle cx="25" cy="170" r="0.5" opacity="0.5"/>
+    <circle cx="85" cy="188" r="0.6" opacity="0.7"/>
+    <circle cx="148" cy="195" r="0.5" opacity="0.6"/>
+    <circle cx="185" cy="95" r="0.7" opacity="0.8"/>
+  </g>
+
+  <g class="group-b" fill="#ffffff">
+    <circle cx="28" cy="42" r="0.5" opacity="0.6"/>
+    <circle cx="62" cy="30" r="0.5" opacity="0.5"/>
+    <circle cx="105" cy="10" r="0.5" opacity="0.6"/>
+    <circle cx="148" cy="8" r="0.5" opacity="0.5"/>
+    <circle cx="188" cy="35" r="0.5" opacity="0.6"/>
+    <circle cx="10" cy="120" r="0.5" opacity="0.6"/>
+    <circle cx="42" cy="185" r="0.7" opacity="0.8"/>
+    <circle cx="128" cy="190" r="0.7" opacity="0.8"/>
+    <circle cx="192" cy="72" r="0.5" opacity="0.5"/>
+    <circle cx="155" cy="38" r="0.5" opacity="0.6"/>
+  </g>
+
+  <g class="group-c" fill="#a8c8ff">
+    <circle cx="75" cy="40" r="0.9" opacity="0.85"/>
+    <circle cx="182" cy="50" r="0.9" opacity="0.85"/>
+    <circle cx="190" cy="105" r="0.9" opacity="0.85"/>
+    <circle cx="95" cy="25" r="0.9" opacity="0.85"/>
+    <circle cx="60" cy="175" r="0.9" opacity="0.85"/>
+    <circle cx="100" cy="185" r="0.9" opacity="0.85"/>
+  </g>
+
+  <g class="group-d" fill="#ffd0e8">
+    <circle cx="35" cy="25" r="0.9" opacity="0.85"/>
+    <circle cx="155" cy="18" r="0.9" opacity="0.85"/>
+    <circle cx="12" cy="75" r="0.9" opacity="0.85"/>
+    <circle cx="180" cy="155" r="0.9" opacity="0.85"/>
+    <circle cx="140" cy="180" r="0.9" opacity="0.85"/>
+  </g>
+
+  <g class="group-e" fill="#ffffff">
+    <circle cx="22" cy="72" r="0.5" opacity="0.5"/>
+    <circle cx="8" cy="55" r="0.6" opacity="0.7"/>
+    <circle cx="135" cy="30" r="0.4" opacity="0.5"/>
+    <circle cx="115" cy="40" r="0.5" opacity="0.6"/>
+    <circle cx="75" cy="60" r="0.5" opacity="0.6"/>
+    <circle cx="165" cy="75" r="0.4" opacity="0.5"/>
+    <circle cx="50" cy="145" r="0.5" opacity="0.6"/>
+    <circle cx="130" cy="160" r="0.5" opacity="0.6"/>
+  </g>
+
+  <g class="group-f" fill="#ffffff">
+    <circle cx="15" cy="145" r="0.6" opacity="0.7"/>
+    <circle cx="195" cy="145" r="0.6" opacity="0.7"/>
+    <circle cx="95" cy="50" r="0.4" opacity="0.5"/>
+    <circle cx="55" cy="75" r="0.4" opacity="0.5"/>
+    <circle cx="145" cy="90" r="0.5" opacity="0.6"/>
+    <circle cx="125" cy="105" r="0.4" opacity="0.5"/>
+    <circle cx="70" cy="160" r="0.4" opacity="0.5"/>
+    <circle cx="150" cy="150" r="0.4" opacity="0.5"/>
+  </g>
+
+  <g filter="url(#starGlow)">
+    <circle cx="28" cy="42" r="1.2" class="tw1" fill="#ffffff"/>
+    <circle cx="85" cy="15" r="1" class="tw2" fill="#ffffff"/>
+    <circle cx="155" cy="18" r="1.1" class="tw3" fill="#ffffff"/>
+    <circle cx="12" cy="75" r="1.1" class="tw4" fill="#ffffff"/>
+    <circle cx="18" cy="155" r="1.1" class="tw1" fill="#ffffff"/>
+    <circle cx="95" cy="25" r="1" class="tw2" fill="#a8c8ff"/>
+    <circle cx="180" cy="155" r="1" class="tw3" fill="#ffffff"/>
+    <circle cx="100" cy="185" r="1" class="tw4" fill="#a8c8ff"/>
+  </g>
+
+  <g filter="url(#glowStrong)">
+    <g class="tw1">
+      <path d="M 55 65 L 56.5 70 L 61.5 71.5 L 56.5 73 L 55 78 L 53.5 73 L 48.5 71.5 L 53.5 70 Z" fill="#ffffff"/>
+      <circle cx="55" cy="71.5" r="1" fill="#ffffff"/>
+    </g>
+    <g class="tw2">
+      <path d="M 148 55 L 149.5 60 L 154.5 61.5 L 149.5 63 L 148 68 L 146.5 63 L 141.5 61.5 L 146.5 60 Z" fill="#5ff0ff"/>
+      <circle cx="148" cy="61.5" r="1" fill="#5ff0ff"/>
+    </g>
+    <g class="tw3">
+      <path d="M 172 165 L 173 169 L 177 170 L 173 171 L 172 175 L 171 171 L 167 170 L 171 169 Z" fill="#ffd93d"/>
+      <circle cx="172" cy="170" r="1" fill="#ffd93d"/>
+    </g>
+  </g>
+
+  <g filter="url(#glowStrong)" class="tw4">
+    <path d="M 100 32 L 101.5 38 L 107.5 39.5 L 101.5 41 L 100 47 L 98.5 41 L 92.5 39.5 L 98.5 38 Z" fill="#ffffff"/>
+    <circle cx="100" cy="39.5" r="1.5" fill="#ffffff"/>
+    <circle cx="100" cy="39.5" r="3" fill="#ffffff" opacity="0.3"/>
+  </g>
+
+  <g class="rainbow" filter="url(#glowSoft)">
+    <path d="M 15 145 A 85 85 0 0 1 185 145" fill="none" stroke="#ff3b3b" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M 21 145 A 79 79 0 0 1 179 145" fill="none" stroke="#ff8f3b" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M 27 145 A 73 73 0 0 1 173 145" fill="none" stroke="#ffd93d" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M 33 145 A 67 67 0 0 1 167 145" fill="none" stroke="#7fe0a0" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M 39 145 A 61 61 0 0 1 161 145" fill="none" stroke="#5ff0ff" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M 45 145 A 55 55 0 0 1 155 145" fill="none" stroke="#7fb3ff" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M 51 145 A 49 49 0 0 1 149 145" fill="none" stroke="#c48fff" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M 40 130 A 60 60 0 0 1 160 130" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" opacity="0.4"/>
+  </g>
+
+  <g filter="url(#glowSoft)">
+    <g class="cloud-left">
+      <ellipse cx="22" cy="148" rx="12" ry="5.5" fill="#ffffff" opacity="0.9"/>
+      <ellipse cx="15" cy="146" rx="7" ry="4" fill="#ffffff" opacity="0.95"/>
+      <ellipse cx="30" cy="147" rx="8" ry="4.5" fill="#ffffff" opacity="0.9"/>
+      <ellipse cx="22" cy="144" rx="10" ry="3" fill="#ffffff" opacity="0.8"/>
+    </g>
+    <g class="cloud-right">
+      <ellipse cx="178" cy="148" rx="12" ry="5.5" fill="#ffffff" opacity="0.9"/>
+      <ellipse cx="185" cy="146" rx="7" ry="4" fill="#ffffff" opacity="0.95"/>
+      <ellipse cx="170" cy="147" rx="8" ry="4.5" fill="#ffffff" opacity="0.9"/>
+      <ellipse cx="178" cy="144" rx="10" ry="3" fill="#ffffff" opacity="0.8"/>
+    </g>
+  </g>
+</svg>
