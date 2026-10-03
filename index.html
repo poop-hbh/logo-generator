@@ -2,12 +2,15 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
 <title>Neon Logo Generator v9</title>
 <style>
     body { background: #0a0a0a; color: #eee; font-family: system-ui, sans-serif;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         min-height: 100vh; margin: 0; padding: 20px; }
-    h1 { font-size: 24px; margin-bottom: 6px; color: #7fe0a0; }
+    h1 { font-size: 24px; margin-bottom: 6px; color: #7fe0a0;
+        display: flex; align-items: center; justify-content: center; gap: 12px; }
+    h1 img { width: 42px; height: 42px; }
     .subtitle { font-size: 13px; color: #888; margin-bottom: 14px; text-align: center; }
     .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; justify-content: center; }
     .logo-box { background: #111; border-radius: 20px; padding: 0;
@@ -30,7 +33,10 @@
 </style>
 </head>
 <body>
-    <h1>🎨 Neon Logo Generator v9</h1>
+    <h1>
+        <img src="logo.svg" alt="Logo"/>
+        Neon Logo Generator v9
+    </h1>
     <div class="subtitle">Темы: пират, любовь, магия, космос, воин, музыка, кот, огонь</div>
     <div class="controls">
         <label>Текст:</label>
@@ -44,7 +50,6 @@
 
 <script>
 // ============ ФИЛЬТР 18+ ============
-// Список используется для БЛОКИРОВКИ контента. Это часть защиты генератора.
 const badRoots = [
     'хуй','хуе','хуё','хуи','хуя','хую','хуйн',
     'пизд','пизж','пезд',
@@ -109,7 +114,6 @@ function isBadWord(text) {
 }
 
 // ============ ТЕМЫ ============
-// У каждой темы — набор символов (иконок) + палитры + шрифты + формы.
 const themes = {
     pirate: {
         keywords: ['пират','пираты','pirate','корсар','korsar','морской'],
@@ -373,7 +377,6 @@ function getBackground(pattern, color, size, icons) {
         return out;
     }
     if (pattern === 'icons' && icons && icons.length) {
-        // Фон из тематических иконок
         let out = '';
         const step = 50;
         for (let y = 25; y < size; y += step) {
@@ -439,7 +442,6 @@ function renderText(text, cx, cy, fontSize, font, color, colorDim, effect, gradI
     return `<text x="${cx}" y="${cy}" ${baseAttrs} fill="${color}">${text}</text>`;
 }
 
-// Ставит большую тематическую иконку рядом с текстом
 function getBigIcon(icons, cx, cy, pal, fontSize, position) {
     if (!icons || !icons.length) return '';
     const icon = rnd(icons);
@@ -475,7 +477,6 @@ function generate() {
     const downloadBtn = document.getElementById('downloadBtn');
     const logoBox = document.getElementById('logoBox');
 
-    // Проверка 18+
     if (isBadWord(display)) {
         warnBox.textContent = '⛔ Запрещённое слово. Введите другое.';
         themeHint.textContent = '';
@@ -488,7 +489,6 @@ function generate() {
         downloadBtn.disabled = false;
     }
 
-    // ============ ОПРЕДЕЛЯЕМ ТЕМУ ============
     const theme = detectTheme(display);
 
     let palettes, fonts, icons, decorations, shapes, backgrounds, effects;
@@ -498,7 +498,6 @@ function generate() {
         icons = theme.icons;
         decorations = theme.decorations;
         shapes = theme.shapes;
-        // К обычным фонам добавляем "icons" — фон из тематических иконок
         backgrounds = theme.backgrounds.concat(['icons']);
         effects = theme.effects;
         themeHint.textContent = 'Активирована тема: ' + theme.label;
@@ -590,7 +589,6 @@ function generate() {
         textLayer = renderText(display, cx, cy + fontSize * 0.35, fontSize, font, pal.bright, pal.dim, textEffect, gradId);
     }
 
-    // ============ БОЛЬШАЯ ТЕМАТИЧЕСКАЯ ИКОНКА ============
     let bigIcon = '';
     if (theme && Math.random() < 0.7) {
         const positions = ['top','bottom','left','right','corner-tl','corner-tr','corner-bl','corner-br'];
