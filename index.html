@@ -4,6 +4,19 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <title>Neon Logo Generator v9</title>
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=113542645', 'ym');
+
+    ym(113542645, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/113542645" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
 <style>
     body { background: #0a0a0a; color: #eee; font-family: system-ui, sans-serif;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -51,7 +64,7 @@
 <script>
 // ============ ФИЛЬТР 18+ ============
 const badRoots = [
-    'хуй','хуе','хуё','хуи','хуя','хую','хуйн',
+    'хуй','хуе','хус','хуи','хуп','хуо','хуйн',
     'пизд','пизж','пезд',
     'бляд','блят','блядь','бля',
     'ебал','ебан','ебат','ебет','ебёт','ебуч','ебля','ебло','ебст',
@@ -77,9 +90,9 @@ const badRoots = [
     'твар',
     'ублюд',
     'выбляд',
-    'нахуй','нахуя',
-    'похуй','похуя',
-    'охуе','охуи','охуя',
+    'нахуй','нахуп',
+    'похуй','похуп',
+    'охуе','охуи','охуп',
     'въебис','въебись',
     'проеб','проёб',
     'член','минет','анальн','оральн','вагин','клитор','пенис',
@@ -112,12 +125,11 @@ function isBadWord(text) {
     const normalized = normalize(text);
     return badRoots.some(root => normalized.includes(normalize(root)));
 }
-
 // ============ ТЕМЫ ============
 const themes = {
     pirate: {
         keywords: ['пират','пираты','pirate','корсар','korsar','морской'],
-        icons: ['☠','⚔','⚓','✖','⛧','★','⚑'],
+        icons: ['☠','⚔','⚓','✖','➤','★','⚑'],
         palettes: [
             { bright: '#ff3b3b', dim: '#5a0a0a' },
             { bright: '#ffd93d', dim: '#5a4a1a' },
@@ -132,7 +144,7 @@ const themes = {
     },
     love: {
         keywords: ['любовь','love','сердце','люблю','любимой','любимая','сердечко'],
-        icons: ['♥','❥','❦','✿','❀','❤'],
+        icons: ['♥','❥','❦','✿','❀','❧'],
         palettes: [
             { bright: '#ff7ad9', dim: '#5a2a4a' },
             { bright: '#ff4d6d', dim: '#5a1a2a' },
@@ -147,7 +159,7 @@ const themes = {
     },
     magic: {
         keywords: ['магия','magic','маг','волшебник','колдун','ведьма','чародей'],
-        icons: ['✦','✧','⚝','☾','☯','⚚','★'],
+        icons: ['✦','✧','⚝','☌','☃','⚚','★'],
         palettes: [
             { bright: '#d0a0ff', dim: '#4a2a5a' },
             { bright: '#b0ff7a', dim: '#3a5a2a' },
@@ -162,7 +174,7 @@ const themes = {
     },
     space: {
         keywords: ['космос','space','звезда','звезды','галактика','планета','луна','space'],
-        icons: ['☾','★','☆','✦','✧','⚝','☄','✵'],
+        icons: ['☌','★','☆','✦','✧','⚝','☄','✵'],
         palettes: [
             { bright: '#7fb3ff', dim: '#2a3a5a' },
             { bright: '#d0a0ff', dim: '#4a2a5a' },
@@ -177,7 +189,7 @@ const themes = {
     },
     warrior: {
         keywords: ['воин','воины','warrior','боец','рыцарь','knight','самурай','битва'],
-        icons: ['⚔','⛧','☠','▲','◆','✖'],
+        icons: ['⚔','➤','☠','▮','◖','✖'],
         palettes: [
             { bright: '#ff5f5f', dim: '#5a1a1a' },
             { bright: '#ffa94d', dim: '#5a3a1a' },
@@ -192,7 +204,7 @@ const themes = {
     },
     music: {
         keywords: ['музыка','music','песня','певец','рок','rock','бит','beat','мелодия'],
-        icons: ['♪','♫','♬','♩','♭','♯','★'],
+        icons: ['♩','♀','♐','♩','♭','♃','★'],
         palettes: [
             { bright: '#ff7ad9', dim: '#5a2a4a' },
             { bright: '#d0a0ff', dim: '#4a2a5a' },
@@ -207,7 +219,7 @@ const themes = {
     },
     cat: {
         keywords: ['кот','кошка','котенок','cat','kitty','котик','кошечка'],
-        icons: ['♥','★','✦','☾','✿','❀'],
+        icons: ['♥','★','✦','☌','✿','❀'],
         palettes: [
             { bright: '#ffa94d', dim: '#5a3a1a' },
             { bright: '#ff7ad9', dim: '#5a2a4a' },
@@ -222,7 +234,7 @@ const themes = {
     },
     fire: {
         keywords: ['огонь','fire','дракон','dragon','пламя','феникс','феник','жар'],
-        icons: ['▲','◆','✦','⚡','☄','★','⚝'],
+        icons: ['▮','◖','✦','⚝','☄','★','⚝'],
         palettes: [
             { bright: '#ff5f5f', dim: '#5a1a1a' },
             { bright: '#ffa94d', dim: '#5a3a1a' },
@@ -264,7 +276,7 @@ const allPalettes = [
 ];
 
 const allFonts = ['Arial Black','Impact','Georgia','Courier New','Verdana','Trebuchet MS','Times New Roman','Comic Sans MS','Tahoma','Palatino'];
-const allIcons = ['⚡','★','♥','◆','▲','☾','✦','✧','∞','☼','⚔','⛧','☯','☠','♪','✿','❀','✵','✵','⚑'];
+const allIcons = ['⚐','★','♥','◖','▮','☌','✦','✧','∴','☊','⚔','➤','☃','☠','♩','✿','❀','✵','✵','⚑'];
 const allDecorations = ['none','dots','lines','orbit','brackets','corners'];
 const allCompositions = ['text-in-shape','text-above-shape','text-beside-shape','text-on-banner','two-shapes','text-only-decor'];
 const allBackgrounds = ['none','grid','dots','hexagon-grid','radial','waves','stars','stripes'];
@@ -461,7 +473,6 @@ function getBigIcon(icons, cx, cy, pal, fontSize, position) {
 
     return `<text x="${x}" y="${y}" text-anchor="middle" font-family="Arial, sans-serif" font-size="${iconSize}" font-weight="900" fill="${pal.bright}">${icon}</text>`;
 }
-
 function generate() {
     const userInput = document.getElementById('userText').value.trim().toUpperCase();
     let display;
@@ -621,10 +632,13 @@ function generate() {
 </svg>`;
 
     logoBox.innerHTML = currentSVG;
+
+    if (typeof ym === 'function') { ym(113542645, 'reachGoal', 'logo_generated'); }
 }
 
 function downloadSVG() {
     if (!currentSVG) return;
+    if (typeof ym === 'function') { ym(113542645, 'reachGoal', 'svg_downloaded'); }
     const blob = new Blob([currentSVG], {type: 'image/svg+xml'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
